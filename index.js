@@ -17,23 +17,45 @@
  \*───────────────────────────────────────────────────────────────────────────*/
 'use strict';
 
+var browserify = require('browserify');
+var through = require('through');
+var spundle = require('spundle');
+var stream = require('stream');
+var iferr = require('iferr');
 
 module.exports = function (options) {
-
-    options.ext = options.ext || 'less';
-    options.dumpLineNumbers = 'comments';
-
+    options.precompile = function (options, cb) {
+        options.skipRead = true;
+        cb(null, options);
+    };
     return function (data, args, callback) {
-        var star = data.toString('utf8');
-        var paths = args.paths;
-        var name = args.context.name;
+        var locale = /(.*)-(.*)/.exec(args.context.filePath.substr(1,5));
+        var b = browserify();
+        var converter = new stream.Writable();
+        converter.data = [];
+        converter._write = function (chunk, enc, cb) {
+            converter.data.push(chunk);
+            cb();
 
-        if (star === 'good') {
-            callback(null, 'star');
-        } else {
-            callback(new Error('Bad star file'));
-        }
-
+        };
+        spundle(args.i18n.contentPath, locale[2], locale[1], iferr(callback, function (out) {
+            b.require(streamOf('module.exports=' + JSON.stringify(out)), {expose: '_languagepack'})
+              .bundle()
+              .pipe(converter)
+              .on('finish', function () {
+                  var buf = Buffer.concat(converter.data); // Create a buffer from all the received chunks
+                  callback(null, buf.toString());
+              })
+              .on('error', callback);
+        }));
     };
 
 };
+
+function streamOf(str) {
+    var o = through();
+    process.nextTick(function () {
+        o.end(str);
+    });
+    return o;
+}
