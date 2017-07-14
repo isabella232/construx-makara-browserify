@@ -1,7 +1,5 @@
 # construx-makara-browserify
 
-Lead Maintainer: [Matt Edelman](https://github.com/grawk)
-
 [![Build Status](https://travis-ci.org/krakenjs/construx-makara-browserify.svg?branch=master)](https://travis-ci.org/krakenjs/construx-makara-browserify)
 [![NPM version](https://badge.fury.io/js/construx-makara-browserify.png)](http://badge.fury.io/js/construx-makara-browserify)
 
@@ -34,4 +32,3 @@ Where you configure your construx plugins:
 ```
 
 _Note: See [construx README](https://github.com/krakenjs/construx/blob/master/README.md) for general usage of construx_
-
